@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>ประชันคูณสาม – Kru Pai Classroom (Set Timer 20 นาที)</title>
+<style>
+  :root{ --bg1:#e6f1ff; --bg2:#fff9db; --card:#ffffff; --ink:#0f172a; --brand:#1d4ed8; --accent:#fbbf24; --ok:#16a34a; --warn:#ef4444; --ring:#1d4ed8; --ring2:#fde68a; }
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{margin:0;font-family:'Noto Sans Thai',system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:linear-gradient(180deg,var(--bg1),var(--bg2));color:var(--ink);height:100vh;overflow:hidden;display:flex;align-items:center;justify-content:center}
+  .app{width:min(1040px,100%);height:100%;display:flex;flex-direction:column}
+  .card{background:var(--card);border-radius:24px;box-shadow:0 14px 30px rgba(2,6,23,.12);overflow:hidden;display:flex;flex:1}
+  header{padding:18px 20px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;background:linear-gradient(90deg,#e0f2ff,#fff3b0)}
+  .brand{display:flex;align-items:center;gap:12px}
+  .logo{width:44px;height:44px;border-radius:12px;background:conic-gradient(from 0deg at 50% 50%,#2563eb,#93c5fd,#f59e0b,#fde68a,#2563eb);display:grid;place-items:center;color:#fff;font-weight:900}
+  h1{margin:0;font-size:clamp(18px,2.6vw,26px);font-weight:900}
+  .pill{display:inline-flex;align-items:center;gap:8px;background:#fff;border:1px dashed #e2e8f0;padding:6px 10px;border-radius:999px}
+  .sub{font-size:12px;opacity:.85}
+  .screen{padding:22px;overflow-y:auto;-webkit-overflow-scrolling:touch;flex:1}
+  .hidden{display:none}
+
+  /* Equation */
+  .eqWrap{display:flex;align-items:center;justify-content:center;flex-wrap:nowrap;gap:10px}
+  .numBubble{display:flex;align-items:center;justify-content:center;width:clamp(48px,12vw,86px);height:clamp(48px,12vw,86px);border-radius:50%;background:var(--ring2);border:6px solid var(--ring);box-shadow:0 8px 20px rgba(37,99,235,.18);font-size:clamp(24px,7vw,42px);font-weight:1000;color:#0f172a;animation:bob 2.2s ease-in-out infinite alternate;flex-shrink:0}
+  .op{font-size:clamp(24px,6vw,38px);color:#0f172a}
+  @keyframes bob{0%{transform:translateY(0)}100%{transform:translateY(-6px)}}
+  .row{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+  .equation{position:relative;background:#f8fafc;border:2px solid #e2e8f0;border-radius:22px;padding:26px 20px 40px}
+  .inputWrap{margin-top:18px;display:flex;align-items:center;gap:8px;justify-content:center}
+  .inputAns{width:min(220px,65vw);font-size:clamp(26px,6vw,38px);text-align:center;font-weight:900;padding:10px 12px;border-radius:14px;border:3px solid #bfdbfe;outline:none;box-shadow:0 6px 10px rgba(0,0,0,.05)}
+  .inputAns:focus{border-color:var(--ring)}
+  .tick{position:static;display:block;text-align:center;font-size:40px;color:var(--ok);opacity:0;transform:scale(.6) translateY(8px);margin-top:8px}
+  .tick.show{animation:tickPop .6s ease forwards}
+  @keyframes tickPop{0%{opacity:0;transform:scale(.6) translateY(8px)}40%{opacity:1;transform:scale(1.1) translateY(-4px)}100%{opacity:1;transform:scale(1) translateY(0)}}
+  .flash-correct{animation:flashOK .45s ease}
+  .flash-wrong{animation:flashBAD .45s ease}
+  @keyframes flashOK{0%{background:#ecfdf5}100%{background:transparent}}
+  @keyframes flashBAD{0%{background:#fee2e2}100%{background:transparent}}
+
+  /* Set grid */
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}
+  .setCard{background:#fff;border:2px solid #bfdbfe;border-radius:16px;padding:14px 12px;box-shadow:0 6px 16px rgba(37,99,235,.1)}
+  .setHeader{display:flex;align-items:center;justify-content:space-between}
+  .setTitle{font-size:18px;font-weight:900}
+  .badge{display:inline-flex;align-items:center;gap:6px;background:var(--accent);color:#111827;border-radius:999px;padding:3px 8px;font-size:12px;font-weight:800}
+  .setBtns{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
+  .setBtn{border:none;cursor:pointer;padding:10px 12px;border-radius:12px;font-weight:800;background:#e0e7ff;color:#1f2937;border:2px solid #c7d2fe}
+  .setBtn.b{background:#fef3c7;border-color:#fde68a}
+  .btn{border:none;cursor:pointer;padding:12px 16px;border-radius:14px;font-weight:800;background:#fde68a;color:#1f2937;border:2px solid #fcd34d;transition:.2s transform}
+  .btn:active{transform:translateY(1px)}
+  .btn.primary{background:#2563eb;color:#fff;border-color:#1d4ed8}
+  .btn.warn{background:#fee2e2;border-color:#fecaca;color:#991b1b}
+  .btn.neutral{background:#e2e8f0;border-color:#cbd5e1;color:#0f172a}
+  .confetti{position:fixed;inset:0;pointer-events:none;overflow:hidden}
+  .confetti i{position:absolute;width:10px;height:16px;opacity:.9;border-radius:3px;will-change:transform}
+  @media (max-width:420px){.numBubble{width:56px;height:56px;font-size:28px}.op{font-size:24px}.eqWrap{gap:8px}}
+</style>
+</head>
+<body>
+<div class="app card" id="app">
+  <header>
+    <div class="brand">
+      <div class="logo">×</div>
+      <div>
+        <h1>ประชันคูณสาม – Multiplication Duel (Set A & B) · จับเวลาเป็นชุด</h1>
+        <div class="sub">ธีม น้ำเงิน–เหลือง · Set A: ลงท้ายศูนย์ · Set B: คูณ 3 ตัว · 10 ชุด × 20 ข้อ · <strong>20 นาที/ชุด</strong></div>
+      </div>
+    </div>
+    <div class="pill"><strong>ผู้เล่น:</strong> <span id="playerNameDisp">ยังไม่ตั้งชื่อ</span></div>
+  </header>
+
+  <!-- Start / Welcome -->
+  <section class="screen" id="startScreen">
+    <div style="display:grid;gap:14px;justify-items:center;text-align:center">
+      <div style="font-weight:900;font-size:26px;color:var(--brand)">ยินดีต้อนรับสู่ “ประชันคูณสาม” ✨</div>
+      <div>ใส่ <strong>ชื่อผู้เล่น</strong> เพื่อเริ่มเล่น</div>
+      <div class="row" style="justify-content:center">
+        <input id="nameInput" class="inputAns" type="text" maxlength="20" placeholder="เช่น: น้องต้นน้ำ" style="width:min(260px,80vw)" />
+        <button id="btnStart" class="btn primary" type="button">เริ่มเล่น</button>
+      </div>
+      <div class="sub">ระบบจะจำชื่อไว้ในเครื่องของหนูนะ</div>
+    </div>
+  </section>
+
+  <section class="screen hidden" id="welcomeScreen">
+    <div style="text-align:center;display:grid;gap:10px;justify-items:center">
+      <div style="font-size:24px;font-weight:900;color:#1d4ed8">ยินดีต้อนรับ <span id="welcomeName">น้อง</span> สู่สนาม “ประชันคูณสาม” 🌟</div>
+      <div class="sub">พร้อมแล้ว… ไปเลือกชุดกันเลย!</div>
+      <div class="row" style="justify-content:center;gap:8px">
+        <button id="btnToSets" class="btn primary" type="button">ไปเลือกชุดทดสอบ</button>
+        <button id="btnChangeName" class="btn neutral" type="button">เปลี่ยนชื่อ</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Set selection -->
+  <section class="screen hidden" id="setScreen">
+    <div class="row" style="justify-content:space-between;margin-bottom:10px">
+      <div class="pill">สถิติ: <strong id="summaryText">ยังไม่เริ่ม</strong></div>
+      <div class="row" style="gap:8px">
+        <button id="btnResetAll" class="btn warn" type="button">ล้างสถิติทั้งหมด</button>
+      </div>
+    </div>
+    <p style="margin-top:0">เลือกชุด **A (ลงท้ายศูนย์)** หรือ **B (คูณ 3 ตัว)** – ทั้งหมด 10 ชุด ชุดละ 20 ข้อ (สุ่มใหม่ทุกครั้ง) – จับเวลา <strong>20 นาที/ชุด</strong></p>
+    <div class="grid" id="setGrid"></div>
+  </section>
+
+  <!-- Play -->
+  <section class="screen hidden" id="playScreen">
+    <div class="row" style="justify-content:space-between;margin-bottom:12px">
+      <div class="pill">กำลังเล่น: <strong>ชุดที่ <span id="setNow"></span><span id="setTypeNow"></span></strong></div>
+      <div class="row" style="gap:8px;align-items:center">
+        <div class="pill">ข้อ: <strong><span id="qIndex">1</span>/20</strong></div>
+        <div class="pill">ถูก: <strong><span id="correctCount">0</span></strong></div>
+        <div class="pill">ผิด: <strong><span id="wrongCount">0</span></strong></div>
+        <div class="pill" id="timerPill">⏱️ เหลือเวลา: <strong><span id="timeLeft">20:00</span></strong></div>
+      </div>
+    </div>
+
+    <div class="equation center" id="eqBox">
+      <div id="eqText" style="font-weight:900"><span class="eqWrap"><span class="numBubble">2</span> <span class="op">×</span> <span class="numBubble">1</span> <span class="op">=</span></span></div>
+      <div class="tick" id="tick">✔</div>
+      <form id="answerForm" class="center inputWrap" autocomplete="off">
+        <input id="answer" class="inputAns" type="tel" inputmode="numeric" pattern="[0-9]*" placeholder="พิมพ์ผลคูณ" required />
+        <button id="submitBtn" class="btn primary" type="submit">ตรวจคำตอบ</button>
+      </form>
+    </div>
+
+    <div class="row" style="justify-content:space-between;margin-top:14px">
+      <div class="toolbar">
+        <button class="btn neutral" id="btnBackSets" type="button">กลับเลือกชุด</button>
+        <button class="btn warn" id="btnStop" type="button">หยุด</button>
+        <button class="btn" id="btnRestart" type="button">เริ่มชุดนี้ใหม่</button>
+      </div>
+      <div class="sub">กติกาโหมดประชัน: ตอบผิด <strong>ไม่นับถูก</strong> และไปข้อถัดไปทันที</div>
+    </div>
+  </section>
+
+  <!-- Result -->
+  <section class="screen hidden center" id="resultScreen">
+    <div style="text-align:center">
+      <div style="font-size:28px;font-weight:900;color:#1d4ed8">สรุปผล ชุดที่ <span id="resSet"></span><span id="resType"></span></div>
+      <div style="margin-top:6px">ถูก: <strong id="resCorrect">0</strong> | ผิด: <strong id="resWrong">0</strong> | ทำไปทั้งหมด: <strong id="resDone">0</strong></div>
+      <div style="margin-top:6px">ความแม่นยำ: <strong id="resAcc">0%</strong> | เวลาคงเหลือ: <strong id="resTime">0:00</strong></div>
+      <div class="row" style="justify-content:center;gap:10px;margin-top:12px">
+        <button id="btnRetrySet" class="btn primary" type="button">เล่นชุดนี้อีกครั้ง</button>
+        <button id="btnChooseAnother" class="btn" type="button">เลือกชุดอื่น</button>
+      </div>
+    </div>
+  </section>
+
+  <div class="confetti" id="confetti"></div>
+</div>
+
+<script>
+(function(){
+  'use strict';
+  // Elements
+  const start = document.getElementById('startScreen');
+  const welcome = document.getElementById('welcomeScreen');
+  const setScreen = document.getElementById('setScreen');
+  const playScreen = document.getElementById('playScreen');
+  const resultScreen = document.getElementById('resultScreen');
+  const setGrid = document.getElementById('setGrid');
+  const summaryText = document.getElementById('summaryText');
+  const nameInput = document.getElementById('nameInput');
+  const btnStart = document.getElementById('btnStart');
+  const btnToSets = document.getElementById('btnToSets');
+  const btnChangeName = document.getElementById('btnChangeName');
+  const btnResetAll = document.getElementById('btnResetAll');
+  const playerNameDisp = document.getElementById('playerNameDisp');
+  const setNow = document.getElementById('setNow');
+  const setTypeNow = document.getElementById('setTypeNow');
+  const qIndex = document.getElementById('qIndex');
+  const correctCountEl = document.getElementById('correctCount');
+  const wrongCountEl = document.getElementById('wrongCount');
+  const timeLeftEl = document.getElementById('timeLeft');
+  const eqText = document.getElementById('eqText');
+  const eqBox = document.getElementById('eqBox');
+  const tick = document.getElementById('tick');
+  const answerForm = document.getElementById('answerForm');
+  const answer = document.getElementById('answer');
+  const btnBackSets = document.getElementById('btnBackSets');
+  const btnStop = document.getElementById('btnStop');
+  const btnRestart = document.getElementById('btnRestart');
+  const resSet = document.getElementById('resSet');
+  const resType = document.getElementById('resType');
+  const resCorrect = document.getElementById('resCorrect');
+  const resWrong = document.getElementById('resWrong');
+  const resDone = document.getElementById('resDone');
+  const resAcc = document.getElementById('resAcc');
+  const resTime = document.getElementById('resTime');
+  const btnRetrySet = document.getElementById('btnRetrySet');
+  const btnChooseAnother = document.getElementById('btnChooseAnother');
+  const confetti = document.getElementById('confetti');
+
+  // State
+  const LS_NAME = 'kru_pai_duel_name_v1';
+  const LS_SCORES = 'kru_pai_duel_scores_v1';
+  let scores = loadScores();
+  let currentSet = 1; let currentType = 'A';
+  let problems = []; let idx = 0; let correct = 0, wrong = 0;
+  const SET_SECONDS = 20*60; // 20 นาที
+  let timer = null; let timeLeft = SET_SECONDS;
+
+  init();
+
+  function init(){
+    const saved = (localStorage.getItem(LS_NAME)||'').trim();
+    if(saved){ playerNameDisp.textContent = saved; document.getElementById('welcomeName').textContent = saved.startsWith('น้อง')? saved : ('น้อง '+saved); switchScreen('welcome'); }
+    else{ switchScreen('start'); }
+    renderSetGrid(); updateSummary();
+  }
+
+  function formatTime(s){ const m=Math.floor(s/60), ss=String(s%60).padStart(2,'0'); return `${m}:${ss}`; }
+
+  function updateSummary(){
+    const keys = Object.keys(scores); const done = keys.length;
+    const bestTotal = Object.values(scores).reduce((s,v)=> s + (v.best||0), 0);
+    summaryText.textContent = done ? `บันทึกคะแนนแล้ว ${done} ชุด · คะแนนรวมสะสม ${bestTotal}` : 'ยังไม่เริ่ม';
+  }
+
+  function switchScreen(name){ [start,welcome,setScreen,playScreen,resultScreen].forEach(s=>s.classList.add('hidden'));
+    if(name==='start') start.classList.remove('hidden');
+    if(name==='welcome') welcome.classList.remove('hidden');
+    if(name==='sets') setScreen.classList.remove('hidden');
+    if(name==='play') playScreen.classList.remove('hidden');
+    if(name==='result') resultScreen.classList.remove('hidden');
+    stopTimer(); }
+
+  // Name
+  btnStart.addEventListener('click', saveNameAndGo);
+  nameInput.addEventListener('keydown', e=>{ if(e.key==='Enter') saveNameAndGo(); });
+  function saveNameAndGo(){ let nm=(nameInput.value||'').trim(); if(!nm) nm='นักเรียน'; localStorage.setItem(LS_NAME,nm); playerNameDisp.textContent=nm; document.getElementById('welcomeName').textContent = nm.startsWith('น้อง')? nm : ('น้อง '+nm); switchScreen('welcome'); }
+  btnToSets.addEventListener('click', ()=> switchScreen('sets'));
+  btnChangeName.addEventListener('click', ()=>{ localStorage.removeItem(LS_NAME); playerNameDisp.textContent='ยังไม่ตั้งชื่อ'; switchScreen('start'); });
+  btnResetAll.addEventListener('click', ()=>{ if(confirm('ล้างสถิติทั้งหมด?')){ scores={}; saveScores(); renderSetGrid(); updateSummary(); }});
+
+  // Set grid
+  function renderSetGrid(){ setGrid.innerHTML=''; for(let s=1;s<=10;s++){ const card=document.createElement('div'); card.className='setCard'; const aKey=s+'A', bKey=s+'B'; const aBest=scores[aKey]?.best; const bBest=scores[bKey]?.best; const starA=(aBest===20)?'<span class="badge">⭐ A 20/20</span>':(aBest!=null?`<span class="sub">A ดีสุด: <strong>${aBest}</strong>/20</span>`:'<span class="sub">A ยังไม่เล่น</span>'); const starB=(bBest===20)?'<span class="badge">⭐ B 20/20</span>':(bBest!=null?`<span class="sub">B ดีสุด: <strong>${bBest}</strong>/20</span>`:'<span class="sub">B ยังไม่เล่น</span>'); card.innerHTML = `
+      <div class="setHeader"><div class="setTitle">ชุดที่ ${s}</div><div class="sub">20 นาที</div></div>
+      <div class="row" style="justify-content:space-between; margin-top:4px"><div>${starA}</div><div>${starB}</div></div>
+      <div class="setBtns"><button class="setBtn" data-type="A">เล่น Set A (ลงท้ายศูนย์)</button><button class="setBtn b" data-type="B">เล่น Set B (คูณ 3 ตัว)</button></div>`; card.querySelectorAll('.setBtn').forEach(btn=>{ btn.addEventListener('click', ()=> startSet(s, btn.getAttribute('data-type'))); }); setGrid.appendChild(card);} }
+
+  // Start set (set-level timer only)
+  function startSet(s,type){ currentSet=s; currentType=type; idx=0; correct=0; wrong=0; problems=(type==='A')?makeSetA(20):makeSetB(20); setNow.textContent=s; setTypeNow.textContent=(type==='A'?' (A)':' (B)'); qIndex.textContent='1'; correctCountEl.textContent='0'; wrongCountEl.textContent='0'; timeLeft=SET_SECONDS; timeLeftEl.textContent=formatTime(timeLeft); updateEquation(); switchScreen('play'); setTimeout(()=>answer.focus(),80); startTimer(); }
+
+  // Generators
+  function makeSetA(n){ const set=new Set(), out=[]; const tryPush=(a,b)=>{const key=a+'x'+b; if(!set.has(key)){set.add(key); out.push({a,b,ans:a*b});}}; while(out.length<n){ const mode=Math.random(); if(mode<0.45){ const tens=10*(2+(Math.random()*9|0)); const other=2+(Math.random()*98|0); tryPush(tens,other);} else if(mode<0.8){ const hundreds=100*(1+(Math.random()*9|0)); const other=2+(Math.random()*98|0); tryPush(hundreds,other);} else { const t1=10*(2+(Math.random()*9|0)); const t2=10*(2+(Math.random()*9|0)); tryPush(t1,t2);} } return out; }
+  function makeSetB(n){ const set=new Set(), out=[]; const tryPush=(a,b,c)=>{const key=a+'x'+b+'x'+c; if(!set.has(key)){set.add(key); out.push({a,b,c,ans:a*b*c});}}; while(out.length<n){ const pat=Math.random(); if(pat<0.35){ const a=[2,4,5,10][Math.random()*4|0]; const b=1+(Math.random()*12|0); const c=[20,25,50,100][Math.random()*4|0]; tryPush(a,b,c);} else if(pat<0.7){ const a=2+(Math.random()*9|0); const b=2+(Math.random()*9|0); const c=[10,20,100][Math.random()*3|0]; tryPush(a,b,c);} else { const a=[25,25,25,8,4,5][Math.random()*6|0]; const b=[4,8,5,2,5,4,10][Math.random()*7|0]; const c=1+(Math.random()*12|0); tryPush(a,b,c);} } return out; }
+
+  function updateEquation(){
+    // ซ่อนเครื่องหมาย ✔ ทุกครั้งก่อนขึ้นข้อใหม่
+    try{ tick.classList.remove('show'); }catch(e){}
+ if(currentType==='A'){ const p=problems[idx]; eqText.innerHTML=`<span class=\"eqWrap\"><span class=\"numBubble\">${p.a}</span><span class=\"op\">×</span><span class=\"numBubble\">${p.b}</span><span class=\"op\">=</span></span>`; } else { const p=problems[idx]; eqText.innerHTML=`<span class=\"eqWrap\"><span class=\"numBubble\">${p.a}</span><span class=\"op\">×</span><span class=\"numBubble\">${p.b}</span><span class=\"op\">×</span><span class=\"numBubble\">${p.c}</span><span class=\"op\">=</span></span>`; } answer.value=''; }
+
+  // Timer (set-level only)
+  function startTimer(){ stopTimer(); timer=setInterval(()=>{ timeLeft--; timeLeftEl.textContent=formatTime(timeLeft); if(timeLeft<=0){ finishSet(); } },1000); }
+  function stopTimer(){ if(timer){ clearInterval(timer); timer=null; } }
+
+  // Answering (no per-question timer)
+  answerForm.addEventListener('submit',(e)=>{ e.preventDefault(); const val=Number((answer.value||'').trim()); const p=problems[idx]; const ans=(currentType==='A')?(p.a*p.b):(p.a*p.b*p.c); if(val===ans){
+      flash(true);
+      // แสดง ✔ ชั่วคราว แล้วซ่อนอัตโนมัติ
+      tick.classList.remove('show'); void tick.offsetWidth; tick.classList.add('show');
+      setTimeout(()=>{ try{ tick.classList.remove('show'); }catch(e){} }, 750);
+      correct++; correctCountEl.textContent=String(correct); } else { flash(false); wrong++; wrongCountEl.textContent=String(wrong); } idx++; if(idx>=problems.length){ finishSet(); } else { qIndex.textContent=String(idx+1); setTimeout(updateEquation,160); } });
+  function flash(ok){ eqBox.classList.remove('flash-correct','flash-wrong'); void eqBox.offsetWidth; eqBox.classList.add(ok?'flash-correct':'flash-wrong'); }
+
+  // Controls
+  btnBackSets.addEventListener('click', ()=> switchScreen('sets'));
+  btnStop.addEventListener('click', finishSet);
+  btnRestart.addEventListener('click', ()=> startSet(currentSet,currentType));
+
+  // Finish & Result
+  function finishSet(){ stopTimer(); const done=Math.min(idx,problems.length); const acc=done>0?Math.round((correct/done)*100):0; resSet.textContent=currentSet; resType.textContent=(currentType==='A'?' (A)':' (B)'); resCorrect.textContent=correct; resWrong.textContent=wrong; resDone.textContent=done; resAcc.textContent=acc+'%'; resTime.textContent=formatTime(timeLeft); const key=currentSet+currentType; const prev=scores[key]?.best||0; const best=Math.max(prev,correct); scores[key]={best,last:correct,timeLeft}; saveScores(); if(correct===20 && timeLeft>0) fireConfetti(); switchScreen('result'); renderSetGrid(); updateSummary(); }
+
+  btnRetrySet.addEventListener('click', ()=> startSet(currentSet,currentType));
+  btnChooseAnother.addEventListener('click', ()=> switchScreen('sets'));
+
+  // Storage helpers
+  function loadScores(){ try{ return JSON.parse(localStorage.getItem(LS_SCORES)||'{}'); }catch(e){ return {}; } }
+  function saveScores(){ localStorage.setItem(LS_SCORES, JSON.stringify(scores)); }
+
+  // Confetti
+  function fireConfetti(){ confetti.innerHTML=''; const colors=['#93c5fd','#2563eb','#fde68a','#f59e0b']; const count=140,W=innerWidth,H=innerHeight; for(let i=0;i<count;i++){ const el=document.createElement('i'); el.style.left=Math.random()*W+'px'; el.style.top='-20px'; el.style.background=colors[(Math.random()*colors.length)|0]; const rot=Math.random()*360,size=6+Math.random()*10; el.style.width=size+'px'; el.style.height=(size*1.4)+'px'; const fall=H+Math.random()*H*.4,drift=(Math.random()*200-100),dur=1800+Math.random()*1200; el.animate([{transform:`translate(0,0) rotate(${rot}deg)`,opacity:1},{transform:`translate(${drift}px, ${fall}px) rotate(${rot+360}deg)`,opacity:.95}],{duration:dur,easing:'cubic-bezier(.2,.7,.2,1)',fill:'forwards'}); confetti.appendChild(el);} setTimeout(()=>confetti.innerHTML='',2600); }
+})();
+</script>
+</body>
+</html>
